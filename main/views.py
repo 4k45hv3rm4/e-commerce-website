@@ -1,14 +1,11 @@
-import logging
 from main import models
 from . import forms
-from django.shortcuts import render
 from django.contrib import messages
 from django.views.generic import FormView
 from django.shortcuts import get_object_or_404
 from django.views.generic.list import ListView
 from django.contrib.auth import login, authenticate
-
-
+import logging
 logger = logging.getLogger(__name__)
 
 
@@ -30,12 +27,10 @@ class ProductListView(ListView):
         return products.order_by("name")
 
 class SignupView(FormView):
-    template_name = 'signup.html'
+    template_name = 'main/signup.html'
     form_class = forms.UserCreationForm
+    success_url = '/'
 
-    def get_success_url(self):
-        redirect_to = self.request.GET('next', '/')
-        return redirect_to
     def form_valid(self, form):
         response = super().form_valid(form)
         form.save()
@@ -44,9 +39,13 @@ class SignupView(FormView):
         logger.info(
             "New signup for email=%s through SignupView", email
         )
+        logger.debug(
+            "New signup for email=%s through SignupView", email
+        )
+        print(logger)
         user = authenticate(email=email, password=raw_password)
         login(self.request, user)
-        form.send_mail()
+
         messages.info(
             self.request, "You signed up successfully."
         )
